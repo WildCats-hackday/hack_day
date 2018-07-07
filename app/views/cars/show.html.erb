@@ -1,0 +1,81 @@
+<div class="container">
+  <div class="col-lg-8">
+    <h1>Tempo real - Taxi <%= @car.codigo %></h1>
+    <div>  
+      <div id="map" style='width: 700px; height: 400px;'></div>  
+    </div>    
+  </div>
+  <!-- /.col-lg-8 -->
+  <div class="col-lg-4">
+    <h1>Notificações</h1>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+          <i class="fa fa-bell fa-fw"></i>
+      </div>
+      <!-- /.panel-heading -->
+      <div class="panel-body">
+        <div class="list-group">
+          <a href="#" class="list-group-item">
+            <i class="fa fa-bolt fa-fw"></i> New Task
+            <span class="pull-right text-muted small"><em>43 minutes ago</em>
+            </span>
+          </a>
+          <a href="#" class="list-group-item">
+              <i class="fa fa-bolt fa-fw"></i> Server Crashed!
+              <span class="pull-right text-muted small"><em>11:13 AM</em>
+              </span>
+          </a>
+        </div>
+        <a href="#" class="btn btn-default btn-block">View All Alerts</a>
+      </div>
+    </div>
+  
+  <p id="notice"><%= notice %></p>
+
+  <p>
+    <strong>Codigo:</strong>
+    <%= @car.codigo %>
+  </p>
+  
+  <p>
+    <strong>Velocidade:</strong>
+    <%= @car.velocidade_atual %>
+  </p>
+  
+  <p>
+    <strong>Log:</strong>
+    <%= @car.log %>
+  </p>
+  
+  <p>
+    <strong>Lat:</strong>
+    <%= @car.lat %>
+  </p>
+</div>
+
+
+
+<script type="text/javascript">  
+
+handler = Gmaps.build('Google');  
+handler.buildMap({ provider: {}, internal: {id: 'map'}}, function(){  
+  markers = handler.addMarkers([  
+    {  
+      "lat": <%= @car.lat %>,  
+      "lng": <%= @car.log %>, 
+      "picture": {  
+        "url" : "http://www.stansted-taxi-booking.co.uk/storage/app/uploads/public/57f/508/73c/thumb_3_32x32_0_0_crop.png",
+        "width":  32,  
+        "height": 32
+      },  
+      "infowindow": "SJSU"  
+    }  
+  ]);  
+  handler.bounds.extendWith(markers);
+  handler.fitMapToBounds();
+  handler.getMap().setZoom(15);
+});  
+</script>
+
+<%= link_to 'Edit', edit_car_path(@car) %> |
+<%= link_to 'Back', cars_path %>
