@@ -54,7 +54,6 @@
 </div>
 
 
-
 <script type="text/javascript">  
 
 handler = Gmaps.build('Google');  
@@ -77,5 +76,21 @@ handler.buildMap({ provider: {}, internal: {id: 'map'}}, function(){
 });  
 </script>
 
-<%= link_to 'Edit', edit_car_path(@car) %> |
+<script type="text/javascript">  
+var amqp = require('amqplib/callback_api');
+
+amqp.connect('amqp://localhost', function(err, conn) {
+  conn.createChannel(function(err, ch) {
+    var q = 'carros';
+
+    ch.assertQueue(q, {durable: false});
+    console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", q);
+    ch.consume(q, function(msg) {
+      console.log(" [x] Received %s", msg.content.toString());
+    }, {noAck: true});
+  });
+});
+
+</script>
+
 <%= link_to 'Back', cars_path %>
