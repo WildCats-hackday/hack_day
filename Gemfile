@@ -7,6 +7,10 @@ gem 'rails', '4.2.5'
 gem 'sqlite3'
 gem 'pg', '~> 0.15'
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw]
+
+gem 'redis-rails' 
+gem 'redis-namespace' 
+gem 'sneakers'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
 # Use Uglifier as compressor for JavaScript assets

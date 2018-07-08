@@ -9,7 +9,7 @@ class CarsController < ApplicationController
 
   # GET /cars/1
   # GET /cars/1.json
-  def show
+  def show  
   end
 
   # GET /cars/new
@@ -28,8 +28,6 @@ class CarsController < ApplicationController
 
     respond_to do |format|
       if @car.save
-        Publisher.publish("cars", @car.attributes)
-        
         format.html { redirect_to @car, notice: 'Car was successfully created.' }
         format.json { render :show, status: :created, location: @car }
       else
