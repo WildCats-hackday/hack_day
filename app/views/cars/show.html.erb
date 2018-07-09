@@ -1,6 +1,6 @@
 <div class="container">
   <div class="col-lg-8">
-    <h1>Tempo real - Taxi <%= @car.codigo %></h1>
+    <h1>Localização atual - Taxi <%= @car.codigo %></h1>
     <div>  
       <div id="map" style='width: 700px; height: 400px;'></div>  
     </div>    
@@ -30,32 +30,64 @@
       </div>
     </div>
   
-  <p id="notice"><%= notice %></p>
+    <p id="notice"><%= notice %></p>
 
-  <p>
-    <strong>Codigo:</strong>
-    <%= @car.codigo %>
-  </p>
-  
-  <p>
-    <strong>Velocidade:</strong>
-    <%= @car.velocidade_atual %>
-  </p>
-  
-  <p>
-    <strong>Log:</strong>
-    <%= @car.log %>
-  </p>
-  
-  <p>
-    <strong>Lat:</strong>
-    <%= @car.lat %>
-  </p>
+    <p>
+      <strong>Codigo:</strong>
+      <%= @car.codigo %>
+    </p>
+    
+    <p>
+      <strong>Velocidade:</strong>
+      <%= @car.velocidade_atual %>
+    </p>
+    
+    <p>
+      <strong>Log:</strong>
+      <%= @car.log %>
+    </p>
+    
+    <p>
+      <strong>Lat:</strong>
+      <%= @car.lat %>
+    </p>
+  </div>
+  <div class="col-lg-8">
+    <h1>Rota atualizada - Taxi <%= @car.codigo %></h1>
+    <div>  
+      <div id="directions" style='width: 700px; height: 400px;'></div>  
+    </div>    
+  </div>
+  <!-- /.col-lg-8 -->
+  <div class="col-lg-4">
+    <h1>Notificações</h1>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+          <i class="fa fa-bell fa-fw"></i>
+      </div>
+      <!-- /.panel-heading -->
+      <div class="panel-body">
+        <div class="list-group">
+          <a href="#" class="list-group-item">
+            <i class="fa fa-bolt fa-fw"></i> New Task
+            <span class="pull-right text-muted small"><em>43 minutes ago</em>
+            </span>
+          </a>
+          <a href="#" class="list-group-item">
+              <i class="fa fa-bolt fa-fw"></i> Server Crashed!
+              <span class="pull-right text-muted small"><em>11:13 AM</em>
+              </span>
+          </a>
+        </div>
+        <a href="#" class="btn btn-default btn-block">View All Alerts</a>
+      </div>
+    </div>
+  </div>
 </div>
 
 
 <script type="text/javascript">  
-
+// Localizacao em Tempo Real
 handler = Gmaps.build('Google');  
 handler.buildMap({ provider: {}, internal: {id: 'map'}}, function(){  
   markers = handler.addMarkers([  
@@ -67,30 +99,117 @@ handler.buildMap({ provider: {}, internal: {id: 'map'}}, function(){
         "width":  32,  
         "height": 32
       },  
-      "infowindow": "SJSU"  
+      "infowindow": "Taxi"  
     }  
   ]);  
   handler.bounds.extendWith(markers);
   handler.fitMapToBounds();
   handler.getMap().setZoom(15);
 });  
+
+$(document).ready(function() {
+    setInterval(function () {
+            $.ajax({
+              url: '/cars/<%= @car.id %>'+'.json',
+              type: 'GET',
+              success: function(res) {
+                  var text = res.responseJSON;
+                  // then you can manipulate your text as you wish
+                  console.log("Valores Tempo Real");
+                  console.log(res);
+                  handler = Gmaps.build('Google');  
+                  handler.buildMap({ provider: {}, internal: {id: 'map'}}, function(){  
+                  markers = handler.addMarkers([  
+                    {  
+                      "lat": res.lat,  
+                      "lng": res.log, 
+                      "picture": {  
+                        "url" : "http://www.stansted-taxi-booking.co.uk/storage/app/uploads/public/57f/508/73c/thumb_3_32x32_0_0_crop.png",
+                        "width":  32,  
+                        "height": 32
+                      },  
+                      "infowindow": "Taxi"  
+                    }  
+                  ]);  
+                  handler.bounds.extendWith(markers);
+                  handler.fitMapToBounds();
+                  handler.getMap().setZoom(15);
+                });
+
+              }
+          });
+    } , 15000);          
+}); 
+
 </script>
 
-<script type="text/javascript">  
-var amqp = require('amqplib/callback_api');
+<script type="text/javascript">
+// Rota percorrida
 
-amqp.connect('amqp://localhost', function(err, conn) {
-  conn.createChannel(function(err, ch) {
-    var q = 'carros';
+var directionsDisplay = new google.maps.DirectionsRenderer();
+var directionsService = new google.maps.DirectionsService();
 
-    ch.assertQueue(q, {durable: false});
-    console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", q);
-    ch.consume(q, function(msg) {
-      console.log(" [x] Received %s", msg.content.toString());
-    }, {noAck: true});
+function calcRoute(obj1,obj2) {
+  var origin      = new google.maps.LatLng(obj1.lat, obj1.log);
+  var destination = new google.maps.LatLng(obj2.lat, obj2.log);
+  var request = {
+      origin:      origin,
+      destination: destination,
+      travelMode:  google.maps.TravelMode.DRIVING
+  };
+  directionsService.route(request, function(response, status) {
+    if (status == google.maps.DirectionsStatus.OK) {
+      directionsDisplay.setDirections(response);
+    }
   });
+}
+
+var obj1 = {
+  lat: <%= @car.lat%>,
+  log: <%= @car.log%>
+};
+calcRoute(obj1,obj1);
+
+var handler1 = Gmaps.build('Google');
+handler1.buildMap({ internal: {id: 'directions'}}, function(){
+  directionsDisplay.setMap(handler1.getMap());
 });
 
+$(document).ready(function() {
+    var routes = [];
+    setInterval(function () {
+            $.ajax({
+              url: '/cars/<%= @car.id %>'+'.json',
+              type: 'GET',
+              success: function(res) {
+                  var text = res.responseJSON;
+                  // then you can manipulate your text as you wish
+                  console.log("Rota Percorrida");
+                  console.log(res);
+                  console.log(routes);
+                  routes.push(res);
+                  console.log(routes.length);
+                  if(routes.length === 1){
+                    calcRoute(obj1, obj1);
+                    var handler1 = Gmaps.build('Google');
+                    handler1.buildMap({ internal: {id: 'directions'}}, function(){
+                      directionsDisplay.setMap(handler1.getMap());
+                    });
+                  }else{
+                    inicialObj = routes[routes.length-2];
+                    finalObj = routes[routes.length-1];
+                    calcRoute(inicialObj,finalObj);
+                    var handler1 = Gmaps.build('Google');
+                    handler1.buildMap({ internal: {id: 'directions'}}, function(){
+                      directionsDisplay.setMap(handler1.getMap());
+                    });
+                  }
+                  
+
+              }
+          });
+    } , 15000);          
+});
 </script>
 
 <%= link_to 'Back', cars_path %>
