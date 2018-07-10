@@ -30,6 +30,7 @@ begin
     puts "Data: #{res.first}\nLat: #{res[1]}\nLog: #{res.last}"
     puts " [x] Received #{body}"
     @car = Car.first
+    @car.data = res[0]
     @car.log = res[1]
     @car.lat = res[2]
     @car.save!

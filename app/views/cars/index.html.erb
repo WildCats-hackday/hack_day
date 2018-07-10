@@ -12,7 +12,7 @@
             <thead>
               <tr>
                 <th>Código</th>
-                <th>Velocidade</th>
+                <th>Data</th>
                 <th>Longitude</th>
                 <th>Latitude</th>
                 <th>#</th>
@@ -22,7 +22,7 @@
               <% @cars.each do |car| %>
                 <tr>
                   <td class="center"><%= car.codigo %></td>
-                  <td class="center"><%= car.velocidade_atual %></td>
+                  <td class="center"><%= car.data %></td>
                   <td class="center"><%= car.log %></td>
                   <td class="center"><%= car.lat %></td>
                   <td class="center"><%= link_to 'Show', car %></td>
